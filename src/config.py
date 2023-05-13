@@ -4,10 +4,9 @@ from pydantic import BaseSettings
 class Settings(BaseSettings):
     TG_TOKEN: str
 
-    REDIS_HOST: str = "localhost"
-    REDIS_PORT: int = 6379
-    REDIS_DB: int = 0
-    REDIS_PASSWORD: str = "redis"
+    STORAGE: str = "memory"
+    SUPERUSER_ID: int = 962654503
+    SQLITE_URL: str = "sqlite+aiosqlite:///db.sqlite3"
 
     class Config:
         env_file = ".env"
