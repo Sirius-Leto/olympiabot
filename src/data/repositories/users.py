@@ -3,13 +3,45 @@ from sqlalchemy.dialects.sqlite import insert
 
 from data.models import UserModel
 from data.schemas.users import UserView, UserCreate
-from data.storages.sqldatabase import SQLalchemyStorage
+from data.storages.sqldatabase import AbstractSQLAlchemyStorage
+
+from abc import ABC, abstractmethod
 
 
-class UserRepository:
-    storage: SQLalchemyStorage
+class AbstractUserRepository(ABC):
+    @abstractmethod
+    async def create(self, user_id: int) -> UserView:
+        ...
 
-    def __init__(self, storage: SQLalchemyStorage) -> None:
+    @abstractmethod
+    async def get_by_tg_id(self, tg_id: int) -> UserView:
+        ...
+
+    @abstractmethod
+    async def get_all(self) -> list[UserView]:
+        ...
+
+    @abstractmethod
+    async def add(self, user: UserCreate) -> None:
+        ...
+
+    @abstractmethod
+    async def create_if_not_exists(self, user: UserCreate) -> UserView:
+        ...
+
+    @abstractmethod
+    async def update(self, user: UserCreate) -> None:
+        ...
+
+    @abstractmethod
+    async def delete(self, user_id: int) -> None:
+        ...
+
+
+class UserRepository(AbstractUserRepository):
+    storage: AbstractSQLAlchemyStorage
+
+    def __init__(self, storage: AbstractSQLAlchemyStorage) -> None:
         self.storage = storage
 
     async def create(self, user_id: int) -> UserView:
@@ -54,4 +86,4 @@ class UserRepository:
             await session.commit()
 
 
-__all__ = ["UserRepository"]
+__all__ = ["UserRepository", "AbstractUserRepository"]

@@ -4,16 +4,16 @@ from typing import TypeVar
 from aiogram import BaseMiddleware, Dispatcher, Router
 from aiogram.types import Message
 
-from data.repositories.roles import RolesRepository
-from data.repositories.users import UserRepository
+from data.repositories.roles import AbstractRolesRepository
+from data.repositories.users import AbstractUserRepository
 
 Repository = TypeVar("Repository")
 
 
 class RepositoryMiddleware(BaseMiddleware):
     repository_keys: list[str]
-    users_repository: UserRepository
-    roles_repository: RolesRepository
+    users_repository: AbstractUserRepository
+    roles_repository: AbstractRolesRepository
 
     def __init__(self, **repositories: Repository) -> None:
         super().__init__()
@@ -33,29 +33,40 @@ class RepositoryMiddleware(BaseMiddleware):
         result = await handler(event, data)
         return result
 
+    def copy(self) -> "RepositoryMiddleware":
+        return RepositoryMiddleware(**{key: getattr(self, key) for key in self.repository_keys})
 
-def setup_repos_middleware(target: Union[Router, Dispatcher]) -> None:
-    from data.storages.sqldatabase import SQLalchemyStorage
+
+async def create_superuser(users_repository: AbstractUserRepository,
+                           roles_repository: AbstractRolesRepository,
+                           tg_id: int) -> None:
     from data.schemas.users import UserCreate
+
+    _user = await (users_repository.create_if_not_exists(UserCreate(tg_id=tg_id)))
+    await roles_repository.set_role(tg_id, "superuser")
+    print(f"Superuser: @{tg_id}")
+
+
+async def setup_repos_middleware(target: Union[Router, Dispatcher]) -> RepositoryMiddleware:
+    from data.storages.sqldatabase import SQLiteStorage
+    from data.repositories.roles import RoleRepository
+    from data.repositories.users import UserRepository
     from config import settings
 
-    storage = SQLalchemyStorage.from_url(settings.SQLITE_URL)
-    storage.create_all()
+    storage = SQLiteStorage.from_url(settings.SQLITE_URL)
+    await storage.create_all()
 
     users_repository = UserRepository(storage)
-    roles_repository = RolesRepository(storage)
-
-    from asyncio import run
-    user = run(users_repository.create_if_not_exists(UserCreate(tg_id=settings.SUPERUSER_ID)))
-    if not user:
-        user = run(users_repository.get_by_tg_id(settings.SUPERUSER_ID))
-    run(roles_repository.setup_role(user.id, "superuser"))
-    print(f"Superuser: {user}")
+    roles_repository = RoleRepository(storage)
+    await roles_repository.init_cache()
 
     middleware = RepositoryMiddleware(users_repository=users_repository,
                                       roles_repository=roles_repository)
 
     target.message.middleware(middleware)
+    target.callback_query.middleware(middleware)
+
+    return middleware
 
 
-__all__ = ["RepositoryMiddleware", "setup_repos_middleware"]
+__all__ = ["RepositoryMiddleware", "setup_repos_middleware", "create_superuser"]

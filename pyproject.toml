@@ -16,6 +16,9 @@ python-dotenv = "^1.0.0"
 aiogram-dialog = {version = "^2.0.0b18", allow-prereleases = true}
 
 
+[tool.poetry.group.dev.dependencies]
+aiogram-dialog = {extras = ["tools"], version = "^2.0.0b18", allow-prereleases = true}
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
