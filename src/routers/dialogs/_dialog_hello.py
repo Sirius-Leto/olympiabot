@@ -4,7 +4,7 @@ from aiogram_dialog.widgets.text import Const
 
 from routers.dialogs.common_components.buttons import NAVIGATION_BAR, HELP_BUTTON
 from routers.dialogs.common_components.texts import hello_message
-from routers.states import MainSG, OlympiadInterestSG
+from routers.states import MainSG
 
 ask_for_acknowledge_window = Window(
     hello_message,
@@ -16,13 +16,14 @@ ask_for_acknowledge_window = Window(
     Row(
         # SwitchTo(Const("Знаю в чем участвовать"), id="user_know_olympiad", state=MainSG.user_know_olympiad),
         Start(Const("Хочу, но не знаю"), id="user_dont_know_olympiad",
-              state=OlympiadInterestSG.ask_user_for_interests),
+              state=MainSG.Interests.start),
     ),
     NAVIGATION_BAR,
     HELP_BUTTON,
     state=MainSG.start
 )
 
-dialog = Dialog(ask_for_acknowledge_window)
+windows = [ask_for_acknowledge_window]
+dialog = Dialog(*windows)
 
 __all__ = ["dialog"]

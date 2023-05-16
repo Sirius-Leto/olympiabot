@@ -2,20 +2,18 @@ from aiogram.fsm.state import StatesGroup, State
 
 
 class MainSG(StatesGroup):
-    start = State("Start")
+    start = State("Hello")
 
+    class Interests(StatesGroup):
+        start = State("Start")
+        ask_user_for_class = State("Classes")
+        ask_user_for_subjects = State("Subjects")
+        ask_user_for_olympiad_level = State("Levels")
 
-class OlympiadInterestSG(StatesGroup):
-    ask_user_for_interests = State("AskUserForInterests")
-    ask_user_for_class = State("AskUserForClass")
-    ask_user_for_subjects = State("AskUserForSubjects")
-    ask_user_for_olympiad_level = State("AskUserForOlympiadLevel")
-
-
-class HelpSG(StatesGroup):
-    help_ = State("Help")
-    faq = State("FAQ")
+    class Help(StatesGroup):
+        start = State("Help")
+        faq = State("FAQ")
 
 
 class AdminSG(StatesGroup):
-    admin_panel = State("AdminPanel")
+    start = State("Hello Admin")

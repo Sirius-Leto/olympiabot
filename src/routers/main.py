@@ -5,7 +5,7 @@ from aiogram_dialog import DialogManager, StartMode
 
 from data.repositories.roles import RoleRepository, UserRole
 from routers.dialogs import dialogs
-from routers.states import MainSG, AdminSG, HelpSG
+from routers.states import MainSG, AdminSG
 
 main_router = Router()
 main_router.include_routers(*dialogs)
@@ -18,7 +18,7 @@ async def _(_message: Message, dialog_manager: DialogManager):
 
 @main_router.message(Command("help"))
 async def _(_message: Message, dialog_manager: DialogManager):
-    await dialog_manager.start(HelpSG.help_, mode=StartMode.RESET_STACK)
+    await dialog_manager.start(MainSG.Help.start, mode=StartMode.RESET_STACK)
 
 
 @main_router.message(Command("admin"))
@@ -27,7 +27,7 @@ async def _(message: Message, dialog_manager: DialogManager, roles_repository: R
     role = await roles_repository.get_role(tg_id)
     if role >= UserRole.MODERATOR:
         await message.answer(f"Ваша роль: {role}")
-        await dialog_manager.start(AdminSG.admin_panel, mode=StartMode.RESET_STACK, data={"role": role})
+        await dialog_manager.start(AdminSG.start, mode=StartMode.RESET_STACK, data={"role": role})
     else:
         await message.answer("У вас нет доступа к админ-панели")
 

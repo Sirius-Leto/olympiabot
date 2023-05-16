@@ -4,7 +4,7 @@ from aiogram_dialog import Window, Dialog
 from aiogram_dialog.widgets.kbd import SwitchTo
 from aiogram_dialog.widgets.text import Const, Multi
 
-from routers.states import HelpSG
+from routers.states import MainSG
 from .common_components.buttons import EXIT_OR_START_BUTTON, BACK_BUTTON
 from config import settings
 
@@ -12,9 +12,9 @@ CONTACT_ADMIN = "https://t.me/dantetemplar"
 
 help_window = Window(
     Const(f"Вы можете обратиться за помощью к администратору бота по адресу: {CONTACT_ADMIN}", ),
-    SwitchTo(Const("FAQ"), id="faq", state=HelpSG.faq),
+    SwitchTo(Const("FAQ"), id="faq", state=MainSG.Help.faq),
     EXIT_OR_START_BUTTON,
-    state=HelpSG.help_,
+    state=MainSG.Help.start,
 )
 
 faq_instances = json.load(open(settings.STATIC_DIR / "faq.json", "r", encoding="utf-8"))
@@ -25,10 +25,12 @@ faq_window = Window(
 
     Multi(*faq_questions, sep="\n\n"),
     BACK_BUTTON, EXIT_OR_START_BUTTON,
-    state=HelpSG.faq,
+    state=MainSG.Help.faq,
     parse_mode="MarkdownV2",
 )
 
-dialog = Dialog(help_window, faq_window)
+windows = [help_window, faq_window]
+
+dialog = Dialog(*windows)
 
 __all__ = ["dialog"]
