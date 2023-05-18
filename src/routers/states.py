@@ -14,6 +14,19 @@ class MainSG(StatesGroup):
         start = State("Help")
         faq = State("FAQ")
 
+    class SearchOlympiads(StatesGroup):
+        start = State("Search Olympiads")
+        create_search_query = State("Create search query")
+
+        class Filter(StatesGroup):
+            start = State("Filter")
+            subjects = State("Subjects")
+            levels = State("Levels")
+            types = State("Types")
+            keyword = State("Keyword")
+
+        search = State("Search")
+
 
 class AdminSG(StatesGroup):
     start = State("Hello Admin")

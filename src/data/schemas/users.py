@@ -1,4 +1,5 @@
-from ._base import BaseModel
+from .__base import BaseModel
+from .__mixins import IdMixin
 
 
 class UserBase(BaseModel):
@@ -9,8 +10,6 @@ class UserCreate(UserBase):
     ...
 
 
-class UserView(UserBase):
-    id: int
-
+class UserView(IdMixin, UserBase):
     class Config:
         orm_mode = True

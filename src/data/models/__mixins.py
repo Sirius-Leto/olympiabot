@@ -13,8 +13,8 @@ class IdMixin:
 
 
 class NameDescriptionMixin:
-    name: Mapped[str] = mapped_column()
-    description: Mapped[str] = mapped_column()
+    name: Mapped[str] = mapped_column(nullable=False, )
+    description: Mapped[str] = mapped_column(nullable=True, default="")
 
     @declared_attr
     def __repr__(self) -> str:
