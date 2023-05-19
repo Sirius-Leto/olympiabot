@@ -6,3 +6,4 @@ from ._levels import Level as LevelModel
 from ._subjects import Subject as SubjectModel
 from ._tags import Tag as TagModel
 from ._users import User as UserModel, UserRoles as UserRolesModel
+from ._grades import Grade as GradeModel, ComplexGrade as ComplexGradeModel

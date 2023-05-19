@@ -1,5 +1,5 @@
+from .__mixins import IdMixin, TimestampMixin, NameDescriptionMixin, TagsMixin, TagsViewMixin, ReferenceMixinFactory
 from .__base import BaseModel
-from .__mixins import IdMixin, TimestampMixin, NameDescriptionMixin, TagsMixin, TagsViewMixin
 
 
 class FieldBase(TimestampMixin, NameDescriptionMixin, TagsMixin, BaseModel):
@@ -15,5 +15,5 @@ class FieldView(IdMixin, TagsViewMixin, FieldBase):
         orm_mode = True
 
 
-class FieldReference(IdMixin, BaseModel):
+class FieldReference(ReferenceMixinFactory(FieldView)):
     ...

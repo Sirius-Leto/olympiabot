@@ -17,3 +17,9 @@ class TagView(IdMixin, TagBase):
 
 class TagReference(BaseModel):
     id: int
+
+    def __init__(self, id: int = None, instance: TagView = None):
+        if instance:
+            super().__init__(id=instance.id)
+        else:
+            super().__init__(id=id)

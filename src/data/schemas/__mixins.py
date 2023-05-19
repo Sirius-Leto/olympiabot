@@ -1,6 +1,7 @@
-from .__base import BaseModel
 from datetime import datetime
 from typing import Optional, List
+
+from .__base import BaseModel
 
 
 class IdMixin(BaseModel):
@@ -20,12 +21,25 @@ class TimestampMixin(BaseModel):
 from .tags import TagReference, TagView
 
 
-class TagsMixin:
+class TagsMixin(BaseModel):
     tags: Optional[List[TagReference]] = None
 
 
-class TagsViewMixin:
+class TagsViewMixin(BaseModel):
     tags: Optional[List[TagView]] = None
+
+
+def ReferenceMixinFactory(
+        ViewModel: type,
+) -> type:
+    class ReferenceMixin(IdMixin, BaseModel):
+        def __init__(self, id: int = None, instance: ViewModel = None):
+            if instance:
+                super().__init__(id=instance.id)
+            else:
+                super().__init__(id=id)
+
+    return ReferenceMixin
 
 
 __all__ = [
@@ -34,5 +48,5 @@ __all__ = [
     "TimestampMixin",
     "TagsMixin",
     "TagsViewMixin",
-    "TagReference",
+    "ReferenceMixinFactory",
 ]

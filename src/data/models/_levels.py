@@ -4,3 +4,4 @@ from .__mixins import IdMixin, TimestampMixin, NameDescriptionMixin, TagsMixinFa
 
 class Level(IdMixin, TimestampMixin, NameDescriptionMixin, TagsMixinFactory(Base), Base):
     __tablename__ = "levels"
+

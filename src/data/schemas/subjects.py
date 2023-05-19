@@ -16,3 +16,7 @@ class SubjectView(IdMixin, TagsViewMixin, SubjectBase):
 
     class Config:
         orm_mode = True
+
+
+class SubjectReference(IdMixin, BaseModel):
+    ...

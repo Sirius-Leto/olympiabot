@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, List
 
 from sqlalchemy import DateTime, ForeignKey, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, declared_attr, relationship, DeclarativeBase
+from sqlalchemy.sql import func
 
 if TYPE_CHECKING:
     from ._tags import Tag
@@ -23,10 +24,10 @@ class NameDescriptionMixin:
 
 class TimestampMixin:
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=datetime.utcnow
+        DateTime(timezone=True), server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
 
@@ -49,3 +50,11 @@ def TagsMixinFactory(
             return relationship("Tag", secondary=f"{self.__tablename__}_x_tags")
 
     return TagsMixin
+
+
+__all__ = [
+    "IdMixin",
+    "NameDescriptionMixin",
+    "TimestampMixin",
+    "TagsMixinFactory",
+]

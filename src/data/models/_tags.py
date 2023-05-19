@@ -4,3 +4,4 @@ from .__base import Base
 
 class Tag(IdMixin, TimestampMixin, NameDescriptionMixin, Base):
     __tablename__ = "tags"
+

@@ -2,8 +2,10 @@
 # from src.config import settings
 
 import datetime
+from typing import Optional
 
 from pydantic import BaseModel, validator
+import re
 
 
 # {
@@ -25,24 +27,39 @@ class Entry(BaseModel):
     name: str
     begin_date: datetime.date  # in file: begin-date and dd-mm-yyyy
     end_date: datetime.date  # in file: end-date and dd-mm-yyyy
-    type: str
+    event_type: str
     level: int
-    format: str
-    grade: str
+    format: Optional[str]
+    grade: list[int]
     subjects: list[str]
-    prizes: str
+    prizes: Optional[str]
     url: str
 
     class Config:
         fields = {
             "begin_date": "begin-date",
             "end_date": "end-date",
-            "url": "URL"
+            "url": "URL",
+            "event_type": "type"
         }
 
     @validator("begin_date", "end_date", pre=True)
     def parse_date(cls, v):
         return datetime.datetime.strptime(v, "%d-%m-%Y").date()
+
+    @validator("grade", pre=True)
+    def parse_grade(cls, v):
+        # "5–11 классы" -> ["5", "6", "7", "8", "9", "10", "11"]
+        v = re.sub(r"–", "-", v)
+        v = re.sub(r"класс(ы)?", "", v)
+        v = v.strip()
+        left, right = v.split("-")
+        return [i for i in range(int(left), int(right) + 1)]
+
+    @validator("format", "prizes", pre=True)
+    def delete_not_found(cls, v):
+        if "Nothing found" in v:
+            return None
 
 
 # async def main():
