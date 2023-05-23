@@ -1,6 +1,8 @@
 from .__base import BaseModel
 from .__mixins import IdMixin, TimestampMixin, NameDescriptionMixin, TagsMixin, TagsViewMixin
-from .fields import FieldReference, FieldView
+
+
+# from .fields import FieldReference, FieldView
 
 
 class SubjectBase(TimestampMixin, NameDescriptionMixin, TagsMixin, BaseModel):
@@ -8,11 +10,12 @@ class SubjectBase(TimestampMixin, NameDescriptionMixin, TagsMixin, BaseModel):
 
 
 class SubjectCreate(SubjectBase):
-    fields: list[FieldReference]
+    # fields: list[FieldReference]
+    ...
 
 
 class SubjectView(IdMixin, TagsViewMixin, SubjectBase):
-    fields: list[FieldView]
+    # fields: list[FieldView]
 
     class Config:
         orm_mode = True

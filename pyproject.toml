@@ -4,20 +4,20 @@ version = "0.1.0"
 description = ""
 authors = ["Ruslan Bel'kov <ruslan.belckov@yandex.ru>"]
 readme = "README.md"
-packages = [{include = "sirius_olympiad"}]
+packages = [{ include = "sirius_olympiad" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-pydantic = {extras = ["dotenv"], version = "^1.10.7"}
-aiogram = {version = "^3.0.0b7", allow-prereleases = true}
-sqlalchemy = {extras = ["aiosqlite"], version = "^2.0.12"}
+pydantic = { extras = ["dotenv"], version = "^1.10.7" }
+aiogram = { version = "^3.0.0b7", allow-prereleases = true }
+sqlalchemy = {extras = ["aiosqlite"], version = "^2.0.15"}
 redis = "^4.5.4"
 python-dotenv = "^1.0.0"
-aiogram-dialog = {version = "^2.0.0b18", allow-prereleases = true}
+aiogram-dialog = { version = "^2.0.0b18", allow-prereleases = true }
 
 
 [tool.poetry.group.dev.dependencies]
-aiogram-dialog = {extras = ["tools"], version = "^2.0.0b18", allow-prereleases = true}
+aiogram-dialog = { extras = ["tools"], version = "^2.0.0b18", allow-prereleases = true }
 
 [build-system]
 requires = ["poetry-core"]

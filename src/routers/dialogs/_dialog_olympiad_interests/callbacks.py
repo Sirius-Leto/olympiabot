@@ -1,13 +1,25 @@
 from typing import Any
 
 from aiogram.types import CallbackQuery
-from aiogram_dialog import DialogManager, Dialog
+from aiogram_dialog import DialogManager, Dialog, StartMode
+from aiogram_dialog.widgets.kbd import Multiselect, ManagedMultiSelectAdapter
 
-from .context import InterestContext
+from .context import InterestContext, InterestOptionsSingleton
+from ...states import UserSG
 
 
 async def on_start(_dialog: Dialog, manager: DialogManager):
-    manager.dialog_data["context"] = InterestContext()
+    # middeware
+    options = InterestOptionsSingleton()
+    manager.dialog_data["context"] = InterestContext(options)
+
+    # widgets
+    level_kbd = manager.find("m_levels")
+    level_kbd: ManagedMultiSelectAdapter
+
+    # set all items to check in level_kbd
+    for item in options.levels_options:
+        await level_kbd.set_checked(item_id=item[1], checked=True)
 
 
 async def get_options(dialog_manager: DialogManager, **_kwargs) -> dict:
@@ -15,39 +27,31 @@ async def get_options(dialog_manager: DialogManager, **_kwargs) -> dict:
     return context.get_options()
 
 
-async def on_class_changed(_callback: CallbackQuery, widget: Any,
-                           _manager: DialogManager, item_id: str):
-    is_checked = widget.is_checked(item_id)
-    context: InterestContext = _manager.dialog_data["context"]
-
-    if is_checked:
-        context.add_chosen("classes", item_id)
-    else:
-        context.remove_chosen("classes", item_id)
-
-
-async def on_subject_changed(_callback: CallbackQuery, widget: Any,
-                             _manager: DialogManager, item_id: str):
-    is_checked = widget.is_checked(item_id)
-    context: InterestContext = _manager.dialog_data["context"]
-
-    if is_checked:
-        context.add_chosen("subjects", item_id)
-    else:
-        context.remove_chosen("subjects", item_id)
-
-
-async def on_level_changed(_callback: CallbackQuery, widget: Any,
-                           _manager: DialogManager, item_id: str):
-    is_checked = widget.is_checked(item_id)
-    context: InterestContext = _manager.dialog_data["context"]
-
-    if is_checked:
-        context.add_chosen("levels", item_id)
-    else:
-        context.remove_chosen("levels", item_id)
-
-
 async def on_submit(_callback: CallbackQuery, _widget: Any, manager: DialogManager):
     context: InterestContext = manager.dialog_data["context"]
-    await manager.done(result=context.get_result())
+
+    grades_kbd = manager.find("m_grades")
+    grades_kbd: ManagedMultiSelectAdapter
+    levels_kbd = manager.find("m_levels")
+    levels_kbd: ManagedMultiSelectAdapter
+    subjects_kbd = manager.find("m_subjects")
+    subjects_kbd: ManagedMultiSelectAdapter
+
+    # get selected items from keyboards
+    grades = grades_kbd.get_checked()
+    levels = levels_kbd.get_checked()
+    subjects = subjects_kbd.get_checked()
+
+    # set selected items to context
+    context.set_chosen("grades", grades)
+    context.set_chosen("levels", levels)
+    context.set_chosen("subjects", subjects)
+
+    # remove this dialog from stack
+    await manager.mark_closed()
+
+    # start next dialog
+    await manager.start(UserSG.SearchOlympiads.list_olympiads, data=context.get_result())
+
+
+__all__ = ["on_start", "get_options", "on_submit"]

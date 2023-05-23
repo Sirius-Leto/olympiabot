@@ -13,5 +13,5 @@ if TYPE_CHECKING:
 class Subject(TagsMixinFactory(Base), IdMixin, TimestampMixin, NameDescriptionMixin, TagsMixinFactory(Base), Base):
     __tablename__ = "subjects"
 
-    field_id: Mapped[int] = mapped_column(ForeignKey("fields.id"))
-    field: Mapped['Field'] = relationship(backref="connected_subjects")
+    # field_id: Mapped[int] = mapped_column(ForeignKey("fields.id"))
+    # field: Mapped['Field'] = relationship(backref="connected_subjects")

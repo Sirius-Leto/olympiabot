@@ -23,3 +23,6 @@ class TagReference(BaseModel):
             super().__init__(id=instance.id)
         else:
             super().__init__(id=id)
+
+    class Config:
+        orm_mode = True

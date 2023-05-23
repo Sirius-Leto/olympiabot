@@ -11,15 +11,15 @@ from config import settings
 from middlewares.repository_middleware import setup_repos_middleware, create_superuser
 from routers.main import main_router, register_stop_handler
 
-if platform.system() == 'Windows':
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-logging.basicConfig(level=logging.INFO)
+def create_fsm_storage():
+    if settings.STORAGE == "memory":
+        from aiogram.fsm.storage.memory import MemoryStorage
 
-if settings.STORAGE == "memory":
-    from aiogram.fsm.storage.memory import MemoryStorage
-
-    storage = MemoryStorage()
+        _storage = MemoryStorage()
+        return _storage
+    else:
+        raise ValueError("Unknown storage")
 
 
 async def create_bot():
@@ -35,7 +35,7 @@ async def create_bot():
 
 
 async def create_dispatcher() -> Dispatcher:
-    dp = Dispatcher(storage=storage)
+    dp = Dispatcher(storage=create_fsm_storage())
     _repos_middleware = await setup_repos_middleware(dp)
     await create_superuser(_repos_middleware.users_repository,
                            _repos_middleware.roles_repository,
@@ -56,5 +56,10 @@ async def main():
 
 
 if __name__ == '__main__':
+    if platform.system() == 'Windows':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    logging.basicConfig(level=logging.INFO)
+
     with suppress(KeyboardInterrupt):
         asyncio.run(main())

@@ -1,37 +1,48 @@
 from collections import defaultdict
 from typing import Any, Union
 
-from ..common_components.emojis import SUBJECTS_EMOJIS, DEFAULT_SUBJECT_EMOJI
+from routers.dialogs.common_components.emojis import SUBJECTS_EMOJIS, DEFAULT_SUBJECT_EMOJI
 from utilities import SingletonMeta
 
+from data.repositories.olympiads import AbstractOlympiadsRepository
+from data.schemas import EventView
 
-class InterestOptionsSingleton(metaclass=SingletonMeta):
+
+class FilterOptionsSingleton(metaclass=SingletonMeta):
     grades_options: list[tuple[str, str]]
     subjects_options: list[tuple[str, str]]
     levels_options: list[tuple[str, str]]
 
-    def __init__(self) -> None:
+    olympiad_repository: AbstractOlympiadsRepository
+
+    def __init__(self, olympiad_repository: AbstractOlympiadsRepository) -> None:
+        self.olympiad_repository = olympiad_repository
+
+    async def init(self) -> None:
         self.grades_options = [
-            ("👶 1-5 класс", "1 2 3 4 5"),
-            ("🧑‍ 6-8 класс", "6 7 8"),
-            ("👨‍🎓 9-11 класс", "9 10 11"),
+            ("👶 1 класс", "1"),
+            ("👶 2 класс", "2"),
+            ("👶 3 класс", "3"),
+            ("👶 4 класс", "4"),
+            ("👶 5 класс", "5"),
+
+            ("🧑‍ 6 класс", "6"),
+            ("🧑‍ 7 класс", "7"),
+            ("🧑‍ 8 класс", "8"),
+
+            ("👨‍🎓 9 класс", "9"),
+            ("👨‍🎓 10 класс", "10"),
+            ("👨‍🎓 11 класс", "11"),
         ]
-        subject_names = (
-            "Математика",
-            "Русский",
-            "Информатика",
-            "Физика",
-            "Химия",
-            "Биология",
-            "География",
-            "История",
-            "Обществознание",
-            "Литература",
-            "Иностранный язык",
-        )
+
+        subjects = await self.olympiad_repository.get_all_subjects()
+        grades = await self.olympiad_repository.get_all_grades()
+
+        subject_names = [subject.name for subject in subjects]
+        subject_names.sort()
 
         self.subjects_options = [
-            (f"{SUBJECTS_EMOJIS.get(subject_name, DEFAULT_SUBJECT_EMOJI)} {subject_name}", subject_name)
+            (f"{SUBJECTS_EMOJIS.get(subject_name, DEFAULT_SUBJECT_EMOJI)}  {subject_name}", subject_name)
             for subject_name in subject_names]
 
         self.levels_options = [
@@ -50,14 +61,18 @@ class InterestOptionsSingleton(metaclass=SingletonMeta):
         }
 
 
-class InterestContext:
+class FilterContext:
     """Контекст для диалога выбора интересов пользователя. Принадлежит конкретному пользователю."""
-    __options: InterestOptionsSingleton
+    __options: FilterOptionsSingleton
     __chosen: defaultdict[str, set[Any]]
 
-    def __init__(self, options: InterestOptionsSingleton) -> None:
+    filtered_olympiads: list[EventView]
+    chosen_olympiad: EventView
+
+    def __init__(self, options: FilterOptionsSingleton) -> None:
         self.__options = options
         self.__chosen = defaultdict(set)
+        self.filtered_olympiads = []
 
     def get_options(self) -> dict[str, list[tuple[str, Any]]]:
         return self.__options.get_options()
@@ -67,13 +82,6 @@ class InterestContext:
 
     def get_result(self) -> dict[str, set]:
         result = dict(self.__chosen)
-
-        if "grades" in result:
-            _ = []
-            for grade in result["grades"]:
-                _.extend(grade.split())
-            result["grades"] = set(_)
-
         return result
 
     def add_chosen(self, key: str, value: Any):

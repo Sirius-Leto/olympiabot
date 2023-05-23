@@ -14,12 +14,11 @@ class IdMixin:
 
 
 class NameDescriptionMixin:
-    name: Mapped[str] = mapped_column(nullable=False, )
+    name: Mapped[str] = mapped_column(nullable=False, unique=True)
     description: Mapped[str] = mapped_column(nullable=True, default="")
 
-    @declared_attr
-    def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} {self.name}>"
+    def __repr__(self):
+        return f"<{self.__class__.__name__}: {self.name} >"
 
 
 class TimestampMixin:

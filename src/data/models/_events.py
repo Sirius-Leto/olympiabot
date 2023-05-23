@@ -1,5 +1,5 @@
 from datetime import date
-from typing import TYPE_CHECKING, List, Dict, Any
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import DateTime, ForeignKey, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -19,9 +19,9 @@ class Event(IdMixin, TimestampMixin, NameDescriptionMixin, TagsMixinFactory(Base
 
     begin_date: Mapped[date] = mapped_column(DateTime, nullable=True)
     end_date: Mapped[date] = mapped_column(DateTime, nullable=True)
-    url: Mapped[str] = mapped_column(nullable=True, default="")
-    format: Mapped[Dict[str, Any]] = mapped_column(nullable=True, default="{}")
-    prizes: Mapped[Dict[str, Any]] = mapped_column(nullable=True, default="{}")
+    url: Mapped[str] = mapped_column(nullable=True)
+    format: Mapped[str] = mapped_column(nullable=True)
+    prizes: Mapped[str] = mapped_column(nullable=True)
 
     event_type_id: Mapped[int] = mapped_column(ForeignKey('event_types.id'))
     event_type: Mapped['EventType'] = relationship(backref="connected_events")

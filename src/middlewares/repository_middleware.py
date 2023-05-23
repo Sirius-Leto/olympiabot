@@ -6,6 +6,7 @@ from aiogram.types import Message
 
 from data.repositories.roles import AbstractRolesRepository
 from data.repositories.users import AbstractUserRepository
+from data.repositories.olympiads import AbstractOlympiadsRepository
 
 Repository = TypeVar("Repository")
 
@@ -14,6 +15,7 @@ class RepositoryMiddleware(BaseMiddleware):
     repository_keys: list[str]
     users_repository: AbstractUserRepository
     roles_repository: AbstractRolesRepository
+    olympiads_repository: AbstractOlympiadsRepository
 
     def __init__(self, **repositories: Repository) -> None:
         super().__init__()
@@ -56,12 +58,15 @@ async def setup_repos_middleware(target: Union[Router, Dispatcher]) -> Repositor
     storage = SQLiteStorage.from_url(settings.SQLITE_URL)
     await storage.create_all()
 
+    from data.repositories.olympiads import OlympiadsRepository
+    olympiads_repository = OlympiadsRepository(storage)
     users_repository = UserRepository(storage)
     roles_repository = RoleRepository(storage)
     await roles_repository.init_cache()
 
     middleware = RepositoryMiddleware(users_repository=users_repository,
-                                      roles_repository=roles_repository)
+                                      roles_repository=roles_repository,
+                                      olympiads_repository=olympiads_repository)
 
     target.message.middleware(middleware)
     target.callback_query.middleware(middleware)

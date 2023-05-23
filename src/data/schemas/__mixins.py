@@ -39,6 +39,9 @@ def ReferenceMixinFactory(
             else:
                 super().__init__(id=id)
 
+        class Config:
+            orm_mode = True
+
     return ReferenceMixin
 
 

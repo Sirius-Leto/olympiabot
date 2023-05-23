@@ -5,7 +5,7 @@ from aiogram_dialog import DialogManager, StartMode
 
 from data.repositories.roles import RoleRepository, UserRole
 from routers.dialogs import dialogs
-from routers.states import MainSG, AdminSG
+from routers.states import UserSG, AdminSG
 
 main_router = Router()
 main_router.include_routers(*dialogs)
@@ -13,12 +13,12 @@ main_router.include_routers(*dialogs)
 
 @main_router.message(Command("start"))
 async def _(_message: Message, dialog_manager: DialogManager):
-    await dialog_manager.start(MainSG.start, mode=StartMode.RESET_STACK)
+    await dialog_manager.start(UserSG.start, mode=StartMode.RESET_STACK)
 
 
 @main_router.message(Command("help"))
 async def _(_message: Message, dialog_manager: DialogManager):
-    await dialog_manager.start(MainSG.Help.start, mode=StartMode.RESET_STACK)
+    await dialog_manager.start(UserSG.Help.start, mode=StartMode.RESET_STACK)
 
 
 @main_router.message(Command("admin"))
