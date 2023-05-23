@@ -41,7 +41,7 @@ level_kbd = Multiselect(
 
 ask_for_grade_window = Window(
     Const("Какой класс\\курс ты рассматриваешь для участия в олимпиадах?"),
-    Group(grade_kbd, width=3),
+    Group(grade_kbd, width=1),
     SwitchTo(Const("Далее  " + NEXT_EMOJI), id="ask_for_subjects", state=UserSG.Interests.ask_subjects),
     NAVIGATION_BAR,
     state=UserSG.Interests.ask_grades
@@ -57,7 +57,12 @@ ask_for_subjects_window = Window(
 )
 
 ask_for_levels_window = Window(
-    Const("Какого уровня олимпиады были бы для тебя наиболее предпочтительными для участия?"),
+    Const("<b>Какого уровня олимпиады были бы для тебя наиболее предпочтительными для участия?</b>"
+          "\n\n<i> Про РСОШ можно почитать <a href='https://rsr-olymp.ru/about'>здесь</a>.</i>"
+          "\n\nЧем ниже(больше по модулю) уровень олимпиады, тем меньше вероятность, что престижный вуз будет учитывать"
+          "её результаты при поступлении."
+          "Соответственно, 1 уровень — это круто, а 3 уровень вряд ли даст много бонусов. "
+          ),
     Column(level_kbd),
     Button(Const("Завершить  " + SUBMIT_EMOJI), id="submit_interests", on_click=on_submit),
     NAVIGATION_BAR,

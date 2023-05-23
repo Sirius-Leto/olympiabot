@@ -92,6 +92,7 @@ jinja_template_for_olympiad = Jinja("""
 [{{level.description}}] {% endfor %}
 {% endif %}
 
+{% if event.tags 
 
 """)
 

@@ -12,9 +12,9 @@ class InterestOptionsSingleton(metaclass=SingletonMeta):
 
     def __init__(self) -> None:
         self.grades_options = [
-            ("👶 1-5 класс", "1 2 3 4 5"),
-            ("🧑‍ 6-8 класс", "6 7 8"),
-            ("👨‍🎓 9-11 класс", "9 10 11"),
+            ("👶 9 класс", "9"),
+            ("🧑‍ 10 класс", "10"),
+            ("👨‍🎓 11 класс", "11"),
         ]
         subject_names = (
             "Математика",
@@ -35,10 +35,10 @@ class InterestOptionsSingleton(metaclass=SingletonMeta):
             for subject_name in subject_names]
 
         self.levels_options = [
+            ("🇷🇺 Всероссийская олимпиада", "0"),
             ("🏅 Перечень РСОШ 1 уровня", "1"),
             ("🥈 Перечень РСОШ 2 уровня", "2"),
             ("🥉 Перечень РСОШ 3 уровня", "3"),
-            ("🇷🇺 Всероссийская олимпиада", "0"),
             # ("🌍 Международная олимпиада", "international")
         ]
 
