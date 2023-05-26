@@ -1,4 +1,5 @@
-from pydantic import BaseSettings, DirectoryPath
+from pydantic import BaseSettings, DirectoryPath, validator
+from pathlib import Path
 
 
 class Settings(BaseSettings):
@@ -6,8 +7,19 @@ class Settings(BaseSettings):
 
     STORAGE: str = "memory"
     SUPERUSER_ID: int = 962654503
-    SQLITE_URL: str = "sqlite+aiosqlite:///db.sqlite3"
+    SQLITE_URL: str = r"sqlite+aiosqlite:///../db.sqlite3"
     STATIC_DIR: DirectoryPath
+
+    @validator("STATIC_DIR", pre=True)
+    def post_static_dir_validator(cls, v):
+        v = Path(v)
+        if not v.is_absolute():
+            v = cls.get_project_dir() / v
+        return v
+
+    @classmethod
+    def get_project_dir(cls) -> Path:
+        return Path(__file__).parent.parent
 
     class Config:
         env_file = "../.env"

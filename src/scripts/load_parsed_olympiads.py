@@ -8,7 +8,7 @@ import re
 from collections import defaultdict
 from typing import Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,22 +18,32 @@ from data.storages.sqldatabase import SQLiteStorage
 
 
 # {
-#       "name": "Олимпиада школьников «Ломоносов» по психологии",
-#       "begin-date": "27-11-2023",
-#       "end-date": "11-03-2024",
-#       "type": "олимпиада",
-#       "level": 1,
-#       "format": "Нужно пройти дистанционный отбор, чтобы участвовать в очном финале",
-#       "grade": "5–11 классы",
-#       "subjects": [
-#         "Биология",
-#         "Психология"
-#       ],
-#       "prizes": "Nothing found",
-#       "URL": "https://olimpiada.ru//activity/328"
+#         "name": "Олимпиада «Газпром»",
+#         "description": "«Газпром» совместно с ведущими техническими и экономическими вузами России проводит отраслевую олимпиаду для учеников 9-11 классов по математике, физике, химии, информатике, инженерному делу и экономике. Соревнования проходят в два этапа: отборочный (дистанционный) и заключительный (очный). К участию в финале допускаются победители и призеры отборочного этапа. Каждый вуз-организатор является также площадкой для написания очного этапа.  ",
+#         "begin_date": "10-10-2023",
+#         "end_date": "12-03-2024",
+#         "event_type": "олимпиада",
+#         "level": 2,
+#         "format": "Очно-заочная. Нужно пройти дистанционный отбор, чтобы участвовать в очном финале",
+#         "grade": [
+#             9,
+#             10,
+#             11
+#         ],
+#         "subjects": [
+#             "Информатика",
+#             "Математика",
+#             "Физика",
+#             "Химия",
+#             "Экономика"
+#         ],
+#         "prizes": "Nothing found",
+#         "URL": "https://olimpiada.ru/activity/5516"
 #     }
+
 class Entry(BaseModel):
     name: str
+    description: Optional[str]
     begin_date: Optional[datetime.datetime]  # in file: begin-date and dd-mm-yyyy
     end_date: Optional[datetime.datetime]  # in file: end-date and dd-mm-yyyy
     event_type: str
@@ -49,7 +59,6 @@ class Entry(BaseModel):
             "begin_date": "begin-date",
             "end_date": "end-date",
             "url": "URL",
-            "event_type": "type"
         }
 
     @validator("begin_date", "end_date", pre=True)
@@ -60,12 +69,7 @@ class Entry(BaseModel):
 
     @validator("grade", pre=True)
     def parse_grade(cls, v):
-        # "5–11 классы" -> ["5", "6", "7", "8", "9", "10", "11"]
-        v = re.sub(r"–", "-", v)
-        v = re.sub(r"класс(ы)?", "", v)
-        v = v.strip()
-        left, right = v.split("-")
-        return [i for i in range(int(left), int(right) + 1)]
+        return list(map(str, v))
 
     @validator("format", "prizes", pre=True)
     def delete_not_found(cls, v):
@@ -83,15 +87,16 @@ async def get_or_create(session: AsyncSession, model: type, **kwargs):
 
 
 TAGS = [
-    ("Олимпиада «Газпром»", "https://olympiad.gazprom.ru/"),
-    ("Олимпиада «Высшая проба»", "https://olymp.hse.ru/mmo/"),
-    ("Всесибирская открытая олимпиада школьников", "https://sesc.nsu.ru/olymp-vsesib/"),
-    ("Олимпиада школьников «Физтех»", "https://olymp.mipt.ru/"),
-    ("Олимпиада «Юные таланты»", "http://olymp.psu.ru/"),
-    ("Олимпиада школьников «Ломоносов»", "https://olymp.msu.ru/"),
-    ("Олимпиада СПбГУ", "https://olympiada.spbu.ru/"),
-    ("Олимпиада «Покори Воробьевы горы!»", "https://pvg.mk.ru/"),
-    ("Всероссийская олимпиада", "https://vserosolimp.edsoo.ru/"),
+    # ("Олимпиада «Газпром»", "https://olympiad.gazprom.ru/"),
+    # ("Олимпиада «Высшая проба»", "https://olymp.hse.ru/mmo/"),
+    # ("Всесибирская открытая олимпиада школьников", "https://sesc.nsu.ru/olymp-vsesib/"),
+    # ("Олимпиада школьников «Физтех»", "https://olymp.mipt.ru/"),
+    # ("Олимпиада «Юные таланты»", "http://olymp.psu.ru/"),
+    # ("Олимпиада школьников «Ломоносов»", "https://olymp.msu.ru/"),
+    # ("Олимпиада СПбГУ", "https://olympiada.spbu.ru/"),
+    # ("Олимпиада «Покори Воробьевы горы!»", "https://pvg.mk.ru/"),
+    # ("Всероссийская олимпиада", "https://vserosolimp.edsoo.ru/"),
+    ("Национальная технологическая олимпиада (НТО)", "https://ntcontest.ru/"),
 ]
 
 LEVELS = [
@@ -122,13 +127,14 @@ async def main():
     storage = SQLiteStorage.from_url(settings.SQLITE_URL)
     await storage.create_all()
 
-    path_to_json = r"C:\Users\dante\PycharmProjects\sirius-olympiad\src\static\parsed.json"
+    path_to_json = r"C:\Users\dante\PycharmProjects\sirius-olympiad\src\static\nto.json"
 
     with open(path_to_json, "r", encoding="utf-8") as read_file:
         data = json.load(read_file)
 
     entries = []
-    for entry in data["instances"]:
+
+    for entry in data:
         entries.append(Entry(**entry))
 
     unique_values = defaultdict(set)
@@ -161,6 +167,9 @@ async def main():
         for tag_name, tag_desc in unique_values["tags"]:
             await get_or_create(session, TagModel, name=tag_name, description=tag_desc)
 
+        nto_tag = select(TagModel).filter_by(name="Национальная технологическая олимпиада (НТО)")
+        nto_tag = await session.scalar(nto_tag)
+
         # check on foreign language
 
         tag_names = set(map(operator.itemgetter(0), unique_values["tags"]))
@@ -169,7 +178,7 @@ async def main():
         for entry in entries:
             # get event if exist continue else create
             event = await session.scalar(select(EventModel).filter_by(name=entry.name))
-
+            print(event)
             if event is not None:
                 continue
 
@@ -180,6 +189,7 @@ async def main():
 
             event = EventModel(
                 name=entry.name,
+                description=entry.description,
                 begin_date=entry.begin_date,
                 end_date=entry.end_date,
                 url=entry.url,
@@ -191,11 +201,13 @@ async def main():
                 subjects=subjects.all(),
             )
 
-            # if some tag name in event name
-            for tag_name in tag_names:
-                if tag_name in entry.name:
-                    tag = await session.scalar(select(TagModel).filter_by(name=tag_name))
-                    event.tags.append(tag)
+            # # if some tag name in event name
+            # for tag_name in tag_names:
+            #     if tag_name in entry.name:
+            #         tag = await session.scalar(select(TagModel).filter_by(name=tag_name))
+            #         event.tags.append(tag)
+
+            event.tags.append(nto_tag)
 
             # if some foreign language in event name
             for foreign_language in FOREIGN_LANGUAGES:

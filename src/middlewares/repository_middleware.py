@@ -44,7 +44,9 @@ async def create_superuser(users_repository: AbstractUserRepository,
                            tg_id: int) -> None:
     from data.schemas.users import UserCreate
 
-    _user = await (users_repository.create_if_not_exists(UserCreate(tg_id=tg_id)))
+    await (users_repository.create_if_not_exists(UserCreate(tg_id=tg_id)))
+    user = await users_repository.get_by_tg_id(tg_id)
+    print(f"User: {user}")
     await roles_repository.set_role(tg_id, "superuser")
     print(f"Superuser: @{tg_id}")
 
@@ -56,6 +58,7 @@ async def setup_repos_middleware(target: Union[Router, Dispatcher]) -> Repositor
     from config import settings
 
     storage = SQLiteStorage.from_url(settings.SQLITE_URL)
+    print(f"Storage: {storage.get_path()}")
     await storage.create_all()
 
     from data.repositories.olympiads import OlympiadsRepository
