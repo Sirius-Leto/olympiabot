@@ -15,7 +15,7 @@ ask_for_acknowledge_window = Window(
           "можешь обратиться за помощью, нажав на соответствующую кнопку."),
     Row(
         Start(Const("Хочу, но не знаю"), id="user_dont_know_olympiad", state=UserSG.Interests.start),
-        Start(Const("Знаю в чем участвовать"), id="user_know_olympiad", state=UserSG.SearchOlympiads.start)
+        Start(Const("Знаю, в чём участвовать"), id="user_know_olympiad", state=UserSG.SearchOlympiads.start)
     ),
     NAVIGATION_BAR,
     HELP_BUTTON,

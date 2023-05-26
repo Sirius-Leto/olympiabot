@@ -26,7 +26,7 @@ class AbstractUserRepository(ABC):
         ...
 
     @abstractmethod
-    async def create_if_not_exists(self, user: UserCreate) -> UserView:
+    async def create_if_not_exists(self, user: UserCreate):
         ...
 
     @abstractmethod
@@ -64,16 +64,13 @@ class UserRepository(AbstractUserRepository):
             session.add(UserModel(**user.dict()))
             await session.commit()
 
-    async def create_if_not_exists(self, user: UserCreate) -> UserView:
+    async def create_if_not_exists(self, user: UserCreate):
         async with self.storage.create_session() as session:
-            query = insert(UserModel).values(user.dict()).returning(UserModel)
+            query = insert(UserModel).values(user.dict())
             query = query.on_conflict_do_nothing(index_elements=[UserModel.tg_id])
 
-            r = await session.scalar(query)
+            await session.execute(query)
             await session.commit()
-
-            if r:
-                return UserView.from_orm(r)
 
     async def update(self, user: UserCreate) -> None:
         async with self.storage.create_session() as session:

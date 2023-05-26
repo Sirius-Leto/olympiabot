@@ -18,7 +18,7 @@ class UserRoles(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
-    user: Mapped['User'] = relationship(backref="roles", single_parent=True)
+    user: Mapped['User'] = relationship(backref="roles", single_parent=True, cascade="all, delete-orphan")
 
     is_superuser: Mapped[bool] = mapped_column(default=False)
     is_admin: Mapped[bool] = mapped_column(default=False)

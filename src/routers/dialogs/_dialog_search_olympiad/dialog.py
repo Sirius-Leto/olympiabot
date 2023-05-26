@@ -90,10 +90,27 @@ jinja_template_for_olympiad = Jinja("""
 📈 <b>Уровни</b>
 {% for level in event.levels %}
 [{{level.description}}] {% endfor %}
+
 {% endif %}
 
-{% if event.tags 
+{% if event.format %}
+<b>Формат проведения</b>
+{{event.format}}
+{% endif %}
 
+{% if event.description %}
+<b>Описание</b>
+{{event.description}}
+{% endif %}
+
+{% if event.tags %}
+<b>Теги</b>
+{% for tag in event.tags %}
+———————————————————————————————
+<i>{{tag.name}}</i>
+{{tag.description}} 
+{% endfor %}
+{% endif %}
 """)
 
 show_olympiad_window = Window(

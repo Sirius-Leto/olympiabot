@@ -1,7 +1,8 @@
 from aiogram import Router, Dispatcher
-from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.filters import Command, ExceptionTypeFilter
+from aiogram.types import Message, ErrorEvent
 from aiogram_dialog import DialogManager, StartMode
+from aiogram_dialog.api.exceptions import UnknownIntent, UnknownState
 
 from data.repositories.roles import RoleRepository, UserRole
 from routers.dialogs import dialogs
@@ -42,3 +43,15 @@ def register_stop_handler(dispatcher: Dispatcher):
             await message.answer("Бот остановлен")
             await dispatcher.storage.close()
             await dispatcher.stop_polling()
+
+
+@main_router.errors(ExceptionTypeFilter(UnknownIntent))
+async def _(error: ErrorEvent):
+    if isinstance(error.exception, KeyError):
+        if error.exception.args[0] != "aiogd_context":
+            raise
+
+    event_type = error.update.event_type
+    if event_type == "callback_query":
+        await error.update.callback_query.answer(
+            "Пожалуйста, начните сначала (/start). Выбранный контекст был сброшен. ")
