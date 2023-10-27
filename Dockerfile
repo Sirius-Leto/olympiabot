@@ -11,5 +11,7 @@ RUN pip install poetry
 RUN poetry install
 # Print the current directory and its contents
 RUN pwd && ls -la
+# Add src to PYTHONPATH
+RUN export PYTHONPATH="${PYTHONPATH}:/app/src"
 # Run the app (src/bot.py)
 ENTRYPOINT ["poetry", "run", "python", "src/bot.py"]
